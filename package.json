@@ -1,0 +1,16 @@
+{
+  "name": "taro-tools",
+  "version": "1.0.1",
+  "description": "Taro常用函数库",
+  "main": "index.js",
+  "author": "908634674@qq.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShaoGongBra/taro-tools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ShaoGongBra/taro-tools/issues"
+  },
+  "homepage": "https://github.com/ShaoGongBra/taro-tools#readme"
+}
