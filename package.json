@@ -1,6 +1,6 @@
 {
   "name": "taro-tools",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Taro常用函数库",
   "main": "index.js",
   "author": "908634674@qq.com",
