@@ -1,8 +1,9 @@
 {
   "name": "taro-tools",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Taro常用函数库",
   "main": "index.js",
+  "types": "index.d.ts",
   "author": "908634674@qq.com",
   "license": "MIT",
   "repository": {
@@ -12,5 +13,10 @@
   "bugs": {
     "url": "https://github.com/ShaoGongBra/taro-tools/issues"
   },
-  "homepage": "https://github.com/ShaoGongBra/taro-tools#readme"
+  "homepage": "https://github.com/ShaoGongBra/taro-tools#readme",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-typedoc": "^3.0.2",
+    "typedoc": "^0.22.10"
+  }
 }
