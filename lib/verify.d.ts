@@ -28,12 +28,43 @@ declare namespace verify {
     /** 长度不符合要求的提示 */
     lengthErrMsg?: string
   }
+
+  /**
+   * 定义验证规则
+   */
+  interface RegsExt {
+    [propName: string]: RegExp
+  }
+
+  /**
+   * 批量验证value
+   */
+  interface VerifysValues {
+    [propName: string]: string
+  }
+
+  /**
+   * 批量验证规则
+   */
+  interface VerifysVerifys {
+    [propName: string]: verify.Option
+  }
 }
 
 /**
  * 内容验证
  * @param {string} value 要验证的值
  * @param verify 验证规则
+ * ```javascript
+ * {
+ *  reg: 'required|phone-tel|l5_8',
+ *  name: '字段名',
+ *  emptyMsg: '为空提示',
+ *  errMsg: '验证错误提示',
+ *  lengthErrMsg: '长度错误提示'
+ * }
+ * ```
+ * reg字段的用法如下
  *
  * required 必填, phone 手机号码, tel 电话号码, email 邮件, money 钱, idcard 身份证
  * 第一个不是required的话 为空不验证
@@ -46,13 +77,6 @@ declare namespace verify {
  * l1_5 长度1-5
  *
  * and验证用|隔开 or验证用-隔开 and优先于or
- * {
- *  reg: 'required|phone-tel|l5_8',
- *  name: '字段名',
- *  emptyMsg: '为空提示',
- *  errMsg: '验证错误提示',
- *  lengthErrMsg: '长度错误提示'
- * }
  * @param regsExt 扩展验证
  * @param hideToast 是否隐藏验证提示
  * @return 是否验证通过 当传入hideToast时验证不通过会返回错误描述，所以验证请验证 === true表示为通过验证
@@ -60,17 +84,23 @@ declare namespace verify {
 export function verify(
   value: string,
   verify: verify.Option,
-  regsExt: object,
+  regsExt: verify.RegsExt,
   hideToast: boolean
 ): boolean | string
 
 /**
  * 批量内容验证
+ * @param values 要验证的值组成的对象 {key: 'value'}
+ * @param verifylist 验证规则合集 {key: {}}
+ * @param regsExt 扩展验证规则 单次生效
+ * @param hideToast 是否隐藏错误提示
+ * @param getKey 是否返回发生错误的字段名称 当此参数为true时，返回值可能是字符串，这时你验证通过需要判断是否全等于 === true
+ * @return 是否验证通过
  */
 export function verifys(
-  values: object,
-  verifylist: object,
-  regsExt: object,
+  values: verify.VerifysValues,
+  verifylist: verify.VerifysVerifys,
+  regsExt: verify.RegsExt,
   hideToast: boolean,
   getKey: boolean
 ): boolean | string
@@ -86,4 +116,4 @@ export function defineVerifyReg(name: string, reg: RegExp): void
  * 定义多个验证规则
  * @param regs
  */
-export function defineVerifyRegs(obj: object): void
+export function defineVerifyRegs(regs: verify.RegsExt): void
