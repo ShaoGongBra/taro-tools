@@ -4,6 +4,12 @@ interface TimeOutTask extends Promise<TimeOutTask> {
 }
 
 /**
+ * 显示一个提示
+ * @param title 提示内容
+ */
+export function toast(title: string): void
+
+/**
  * 设置页面标题
  * @param title 标题
  */
