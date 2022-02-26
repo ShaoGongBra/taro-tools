@@ -180,6 +180,25 @@ export function request(option: string | request.RequestOption): RequestTask
  */
 export function throttleRequest(option: request.RequestOption, mark?: string): ThrottleRequestTask
 
+export namespace requestMiddle {
+  /**
+   * 请求参数中间件 在发起请求之前将处理过的请求参数传入
+   * @param callback
+   */
+  function request(callback: (requestParams: {
+    url: string,
+    data: object | string,
+    header: object,
+    method: keyof request.method,
+    timeout: number
+  }, params: request.RequestOption) => object | Promise<object>): void
+  function result(callback: (result: object, params: request.RequestOption) => object | Promise<object>): void
+  function error(callback: (error: {
+    code: number,
+    message: string
+  } | object, params: request.RequestOption) => object | Promise<object>): void
+}
+
 
 declare namespace upload {
 
