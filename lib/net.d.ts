@@ -112,7 +112,7 @@ declare namespace request {
     /** 请求类型 */
     method?: keyof method
     /** 请求超时时间（ms） 默认30000 */
-    tomeout: number
+    tomeout?: number
     /**
      * 防止重复请求的时间间隔，在这个事件内如果发生相同参数的请求将被拦截触发catch
      * catch将返回，下面的数据，如果你不想使用，可以把这个值设置为0
@@ -121,18 +121,24 @@ declare namespace request {
      * ```
      * @default 500
      */
-    repeatTime: number
+    repeatTime?: number
     /**
      * 是否在请求过程中显示loading
      * 传入一个字符串，将在请求的时候显示这个字符串
      */
-    loading: boolean | string
+    loading?: boolean | string
     /**
      * 是否在请求至catch的时候toast一个错误提示
      */
-    toast: boolean
+    toast?: boolean
     /** 请求配置 用于覆盖默认配置 */
-    config: RequestConfig
+    config?: RequestConfig,
+    /** 中间件 用于覆盖默认配置的中间件 */
+    middle?: {
+      request?: () => void[]
+      result?: () => void[]
+      error?: () => void[]
+    }
   }
 }
 
