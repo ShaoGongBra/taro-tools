@@ -218,6 +218,12 @@ declare namespace upload {
     count?: number
     /** 选择图片的来源 */
     sourceType?: Array<keyof sourceType>
+    /** 用户替换默认设置的api */
+    api?: string
+    /** 用户替换默认的上传字段 */
+    requestField?: string | string[] | Function
+    /** 用户替换默认的返回值字段 */
+    resultField?: string | string[] | Function
   }
 
   /**
