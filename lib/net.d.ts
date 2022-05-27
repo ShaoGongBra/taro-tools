@@ -125,8 +125,9 @@ declare namespace request {
     /**
      * 是否在请求过程中显示loading
      * 传入一个字符串，将在请求的时候显示这个字符串
+     * 传入一个loading函数，将会执行这个函数，并且要求这个函数返回这个停止loading的函数
      */
-    loading?: boolean | string
+    loading?: boolean | string | (() => () => void)
     /**
      * 是否在请求至catch的时候toast一个错误提示
      */
