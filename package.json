@@ -1,6 +1,6 @@
 {
   "name": "taro-tools",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "Taro常用函数库",
   "main": "index.js",
   "types": "index.d.ts",

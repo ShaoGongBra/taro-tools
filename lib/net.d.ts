@@ -217,14 +217,22 @@ declare namespace upload {
      * @default 1
      */
     count?: number
-    /** 选择图片的来源 */
-    sourceType?: Array<keyof sourceType>
     /** 用户替换默认设置的api */
     api?: string
     /** 用户替换默认的上传字段 */
     requestField?: string | string[] | Function
     /** 用户替换默认的返回值字段 */
     resultField?: string | string[] | Function
+    /** 选择图片的来源 */
+    sourceType?: Array<keyof sourceType>
+    /** 选择图片的来源 */
+    sizeType?: Array<keyof sizeType>
+    /** 视频压缩 */
+    compressed?: boolean
+    /** 拍摄时的最大时长 单位秒 */
+    maxDuration?: number
+    /** 默认拉起的是前置或者后置摄像头。部分 Android 手机下由于系统 ROM 不支持无法生效 */
+    camera?: keyof camera
   }
 
   /**
@@ -250,6 +258,27 @@ declare namespace upload {
     user
     /** 使用后置摄像头(仅H5纯浏览器) */
     environment
+  }
+
+  /**
+   * 图片压缩
+   */
+  interface sizeType {
+    /** 原图 */
+    original
+    /** 压缩图 */
+    compressed
+  }
+
+  /**
+   * 摄像头
+   */
+  interface camera {
+    /** 默认拉起后置摄像头 */
+    back
+    /** 默认拉起前置摄像头 */
+    front
+
   }
 }
 
