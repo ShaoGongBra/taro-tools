@@ -225,7 +225,7 @@ declare namespace upload {
     resultField?: string | string[] | Function
     /** 选择图片的来源 */
     sourceType?: Array<keyof sourceType>
-    /** 选择图片的来源 */
+    /** 图片压缩类型 */
     sizeType?: Array<keyof sizeType>
     /** 视频压缩 */
     compressed?: boolean
