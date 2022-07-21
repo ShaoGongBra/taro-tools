@@ -170,6 +170,13 @@ interface ThrottleRequestTask extends Promise<ThrottleRequestTask> {
 export function request(option: string | request.RequestOption): RequestTask
 
 /**
+ * 用hook的形式获取请求数据
+ * @param option 同request请求参数 当参数判断为假时，不会发起请求
+ * @param onError 如果走到catch执行的回调函数
+ */
+export function useRequest(option: string | request.RequestOption, onError?: Function): object | any
+
+/**
  * 发起一个节流请求函数
  * @param option 请求参数同 request
  * @param mark 当前标识 当你的url和data均相同时，可以添加一个mark区分他们
@@ -186,6 +193,14 @@ export function request(option: string | request.RequestOption): RequestTask
  * ```
  */
 export function throttleRequest(option: request.RequestOption, mark?: string): ThrottleRequestTask
+
+/**
+ * 用hook的形式发起一个节流请求函数
+ * @param option 同throttleRequest请求参数 当参数判断为假时，不会发起请求
+ * @param mark 当前标识 当你的url和data均相同时，可以添加一个mark区分他们
+ * @param onError 如果走到catch执行的回调函数
+ */
+export function useThrottleRequest(option: string | request.RequestOption, mark?: string, onError?: Function): object | any
 
 export namespace requestMiddle {
   /**
