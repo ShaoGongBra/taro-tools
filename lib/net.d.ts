@@ -153,6 +153,13 @@ interface ThrottleRequestTask extends Promise<ThrottleRequestTask> {
 }
 
 /**
+ * 获取完成的url
+ * @param url api
+ * @param data 要加在url上的get参数
+ */
+export function getUrl(url: string, data: object): string
+
+/**
  * 发起请求函数
  * @param option 填写一个url或者一个请求配置
  * @example
@@ -295,6 +302,16 @@ declare namespace upload {
     front
 
   }
+
+  /**
+   * 临时文件
+   */
+  interface File {
+    /** 文件路径 */
+    path: string
+    /** 文件大小 */
+    size: number
+  }
 }
 
 declare namespace uploadTask {
@@ -335,3 +352,14 @@ interface UploadTask extends Promise<UploadTask> {
  * ```
  */
 export function upload(type: keyof upload.Type, option: upload.Option): UploadTask
+
+/**
+ * 直接上传已经选择的文件
+ * @param files 类型 支持图片或者视频
+ * @param option 选项
+ * @example
+ * ```javascript
+ * uploadTempFile([{ path: '' }])
+ * ```
+ */
+export function uploadTempFile(files: upload.File[], option: upload.Option): UploadTask
