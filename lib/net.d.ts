@@ -141,6 +141,13 @@ declare namespace request {
       error?: () => void[]
     }
   }
+
+  interface HookAction {
+    /**
+     * 重新加载数据
+     */
+    reload: () => void
+  }
 }
 
 interface RequestTask extends Promise<RequestTask> {
@@ -181,7 +188,7 @@ export function request(option: string | request.RequestOption): RequestTask
  * @param option 同request请求参数 当参数判断为假时，不会发起请求
  * @param onError 如果走到catch执行的回调函数
  */
-export function useRequest(option: string | request.RequestOption, onError?: Function): object | any
+export function useRequest(option: string | request.RequestOption, onError?: Function): [object | any, request.HookAction]
 
 /**
  * 发起一个节流请求函数
@@ -207,7 +214,7 @@ export function throttleRequest(option: request.RequestOption, mark?: string): T
  * @param mark 当前标识 当你的url和data均相同时，可以添加一个mark区分他们
  * @param onError 如果走到catch执行的回调函数
  */
-export function useThrottleRequest(option: string | request.RequestOption, mark?: string, onError?: Function): object | any
+export function useThrottleRequest(option: string | request.RequestOption, mark?: string, onError?: Function): [object | any, request.HookAction]
 
 export namespace requestMiddle {
   /**
