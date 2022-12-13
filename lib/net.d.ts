@@ -19,19 +19,19 @@ interface RequestConfig {
      * 公共请求header
      * 可以传入函数或者对象 函数需要返回一个对象
      */
-    header: object | Function,
+    header: object | ((option: object) => object),
     /**
      * 要携带在请求上的参数
      * 根据method请求类型 参数自动设置在GET或者POST
      * 可以传入函数或者对象 函数需要返回一个对象
      */
-    data: object | Function,
+    data: object | (() => void),
     /**
      * 要携带在请求url上的参数
      * 即使使用POST请求时 也在GET参数上
      * 可以传入函数或者对象 函数需要返回一个对象
      */
-    getData: object | Function
+    getData: object | (() => void)
   },
   /**
    * 返回结果配置
@@ -53,20 +53,20 @@ interface RequestConfig {
      * 多级请用数组表示
      * 可以传入函数处理数据
      */
-    code: string | string[] | Function,
+    code: string | string[] | (() => void),
     /**
      * 返回值获取提示信息的字段
      * 多级请用数组表示
      * 可以传入函数处理数据
      */
-    message: string | string[] | Function,
+    message: string | string[] | (() => void),
     /**
      * 要返回到请求结果的字段
      * 当code对比成功时返回此值
      * 多级请用数组表示
      * 可以传入函数处理数据
      */
-    data: string | string[] | Function,
+    data: string | string[] | (() => void),
   },
   /**
    * 上传配置
@@ -76,23 +76,11 @@ interface RequestConfig {
     // 上传api api后可以携带参数
     api: string,
     // 上传文件时的字段名，因小程序限制，单次上传仅能上传一个文件所以只能设置一个名称
-    requestField: string | string[] | Function,
+    requestField: string | string[] | (() => void),
     // 返回值的图片路径的url 如果有多级可以配置数组 如[0, url] 或者函数
-    resultField: string | string[] | Function,
+    resultField: string | string[] | (() => void),
   }
 }
-
-/**
- * 设置请求配置 设置后 从taro-tools导出的request函数将按照此配置请求
- * @param data 要设置的配置
- */
-export function setRequestConfig(option: RequestConfig): RequestConfig
-
-/**
- * 合并并返回一个请求配置，不会改变原配置
- * @param data 要设置的配置
- */
-export function getRequestConfig(option: RequestConfig): RequestConfig
 
 declare namespace request {
   interface method {
@@ -135,27 +123,77 @@ declare namespace request {
     /** 请求配置 用于覆盖默认配置 */
     config?: RequestConfig,
     /** 中间件 用于覆盖默认配置的中间件 */
-    middle?: {
-      request?: () => void[]
-      result?: () => void[]
-      error?: () => void[]
-    }
+    middle?: middle
   }
 
-  interface HookAction {
+
+  interface middle {
     /**
-     * 重新加载数据
+     * 请求参数中间件 在发起请求之前将处理过的请求参数传入
+     * @param callback
      */
-    reload: () => void
+    before: (callback: (requestParams: {
+      url: string,
+      data: object | string,
+      header: object,
+      method: keyof request.method,
+      timeout: number
+    }, params: request.RequestOption) => object | Promise<object>) => void
+
+    result: (callback: (result: object, params: request.RequestOption) => object | Promise<object>) => void
+    error: (callback: (error: {
+      code: number,
+      message: string
+    } | object, params: request.RequestOption) => object | Promise<object>) => void
   }
-}
 
-interface RequestTask extends Promise<RequestTask> {
-  /** 取消请求 */
-  abort(): void
-}
 
-interface ThrottleRequestTask extends Promise<ThrottleRequestTask> {
+
+  interface RequestTask extends Promise<RequestTask> {
+    /** 取消请求 */
+    abort(): void
+  }
+
+  interface ThrottleRequestTask extends Promise<ThrottleRequestTask> {
+
+  }
+
+  interface functions {
+    /**
+     * 发起请求函数
+     * @param option 填写一个url或者一个请求配置
+     * @example
+     * ```javascript
+     * request('index/index/list').then(res => {
+     *  console.log(res)
+     * })
+     * request({
+     *  url: 'index/index/list'
+     * }).then(res => {
+     *  console.log(res)
+     * })
+     * ```
+     */
+    request(option: string | RequestOption): RequestTask
+
+    /**
+     * 发起一个节流请求函数
+     * @param option 请求参数同 request
+     * @param mark 当前标识 当你的url和data均相同时，可以添加一个mark区分他们
+     * @example
+     * ```javascript
+     * throttleRequest({
+     *  url: 'api/test'
+     * }).then(res => {
+     *  // then里面的数据是经过节流处理的
+     * }).catch(err => {
+     *  // err.code === 1 // 过快请求
+     *  // err.code === 2 // 请求被覆盖
+     * })
+     * ```
+     */
+    throttleRequest(option: RequestOption, mark?: string): ThrottleRequestTask
+  }
 
 }
 
@@ -163,77 +201,9 @@ interface ThrottleRequestTask extends Promise<ThrottleRequestTask> {
  * 获取完成的url
  * @param url api
  * @param data 要加在url上的get参数
+ * @param params 请求参数
  */
-export function getUrl(url: string, data: object): string
-
-/**
- * 发起请求函数
- * @param option 填写一个url或者一个请求配置
- * @example
- * ```javascript
- * request('index/index/list').then(res => {
- *  console.log(res)
- * })
- * request({
- *  url: 'index/index/list'
- * }).then(res => {
- *  console.log(res)
- * })
- * ```
- */
-export function request(option: string | request.RequestOption): RequestTask
-
-/**
- * 用hook的形式获取请求数据
- * @param option 同request请求参数 当参数判断为假时，不会发起请求
- * @param onError 如果走到catch执行的回调函数
- */
-export function useRequest(option: string | request.RequestOption, onError?: Function): [object | any, request.HookAction]
-
-/**
- * 发起一个节流请求函数
- * @param option 请求参数同 request
- * @param mark 当前标识 当你的url和data均相同时，可以添加一个mark区分他们
- * @example
- * ```javascript
- * throttleRequest({
- *  url: 'api/test'
- * }).then(res => {
- *  // then里面的数据是经过节流处理的
- * }).catch(err => {
- *  // err.code === 1 // 过快请求
- *  // err.code === 2 // 请求被覆盖
- * })
- * ```
- */
-export function throttleRequest(option: request.RequestOption, mark?: string): ThrottleRequestTask
-
-/**
- * 用hook的形式发起一个节流请求函数
- * @param option 同throttleRequest请求参数 当参数判断为假时，不会发起请求
- * @param mark 当前标识 当你的url和data均相同时，可以添加一个mark区分他们
- * @param onError 如果走到catch执行的回调函数
- */
-export function useThrottleRequest(option: string | request.RequestOption, mark?: string, onError?: Function): [object | any, request.HookAction]
-
-export namespace requestMiddle {
-  /**
-   * 请求参数中间件 在发起请求之前将处理过的请求参数传入
-   * @param callback
-   */
-  function request(callback: (requestParams: {
-    url: string,
-    data: object | string,
-    header: object,
-    method: keyof request.method,
-    timeout: number
-  }, params: request.RequestOption) => object | Promise<object>): void
-  function result(callback: (result: object, params: request.RequestOption) => object | Promise<object>): void
-  function error(callback: (error: {
-    code: number,
-    message: string
-  } | object, params: request.RequestOption) => object | Promise<object>): void
-}
+export function getUrl(url: string, data: object, params: request.RequestOption): string
 
 
 declare namespace upload {
@@ -249,19 +219,23 @@ declare namespace upload {
     /** 用户替换默认设置的api */
     api?: string
     /** 用户替换默认的上传字段 */
-    requestField?: string | string[] | Function
+    requestField?: string | string[] | (() => void)
     /** 用户替换默认的返回值字段 */
-    resultField?: string | string[] | Function
+    resultField?: string | string[] | (() => void)
     /** 选择图片的来源 */
-    sourceType?: Array<keyof sourceType>
+    sourceType?: keyof sourceType[]
     /** 图片压缩类型 */
-    sizeType?: Array<keyof sizeType>
+    sizeType?: keyof sizeType[]
     /** 视频压缩 */
     compressed?: boolean
     /** 拍摄时的最大时长 单位秒 */
     maxDuration?: number
     /** 默认拉起的是前置或者后置摄像头。部分 Android 手机下由于系统 ROM 不支持无法生效 */
     camera?: keyof camera
+    /** 请求配置 */
+    config?: RequestConfig
+    /** 中间件 */
+    middle?: middle
   }
 
   /**
@@ -319,54 +293,158 @@ declare namespace upload {
     /** 文件大小 */
     size: number
   }
-}
 
-declare namespace uploadTask {
-  /** 上传进度回调数据 */
-  interface ProgressOption {
-    /** 上传进度百分比 */
-    progress: number
-    /** 预期需要上传的数据总长度，单位 Bytes */
-    totalBytesExpectedToSend: number
-    /** 已经上传的数据长度，单位 Bytes */
-    totalBytesSent: number
+  interface middle {
+    /**
+     * 请求参数中间件 在发起请求之前将处理过的请求参数传入
+     * @param callback
+     */
+    before(callback: (requestParams: {
+      url: string,
+      data: object | string,
+      header: object,
+      method: keyof request.method,
+      timeout: number
+    }, params: request.RequestOption) => object | Promise<object>): void
+    result(callback: (result: object[], params: request.RequestOption) => object[] | Promise<object[]>): void
+    error(callback: (error: {
+      code: number,
+      message: string
+    } | object, params: request.RequestOption) => object | Promise<object>): void
+  }
+
+
+  namespace uploadTask {
+    /** 上传进度回调数据 */
+    interface ProgressOption {
+      /** 上传进度百分比 */
+      progress: number
+      /** 预期需要上传的数据总长度，单位 Bytes */
+      totalBytesExpectedToSend: number
+      /** 已经上传的数据长度，单位 Bytes */
+      totalBytesSent: number
+    }
+  }
+
+  interface UploadTask extends Promise<UploadTask> {
+    /** 取消请求 */
+    abort(): void
+    /**
+     * 监听上传进度
+     * @param callback 回调函数
+     */
+    progress(callback: (res: uploadTask.ProgressOption) => void): UploadTask
+    /**
+     * 选择完成后 开始上传通知
+     * @param callback
+     */
+    start(callback: () => void): UploadTask
+  }
+
+  interface functions {
+    /**
+       * 图片及视频上传方法，包含从选择到上传两个过程
+       * @param type 类型 支持图片或者视频
+       * @param option 选项
+       * @example
+       * ```javascript
+       * upload('image', { count: 1, sourceType: ['album', 'camera'] })
+       * upload('video', { sourceType: ['album', 'camera'] })
+       * ```
+       */
+    upload(type: keyof upload.Type, option: upload.Option): UploadTask
+
+    /**
+     * 直接上传已经选择的文件
+     * @param files 类型 支持图片或者视频
+     * @param option 选项
+     * @example
+     * ```javascript
+     * uploadTempFile([{ path: '' }])
+     * ```
+     */
+    uploadTempFile(files: upload.File[], option: upload.Option): UploadTask
   }
 }
 
-interface UploadTask extends Promise<UploadTask> {
-  /** 取消请求 */
-  abort(): void
-  /**
-   * 监听上传进度
-   * @param callback 回调函数
-   */
-  progress(callback: (res: uploadTask.ProgressOption) => void): UploadTask
-  /**
-   * 选择完成后 开始上传通知
-   * @param callback
-   */
-  start(callback: Function): UploadTask
+export function createRequest(config: {
+  config: RequestConfig,
+  middle: {
+    before: request.middle["before"][]
+    result: request.middle["result"][]
+    error: request.middle["error"][]
+  }
+}): {
+  middle: {
+    /**
+     * 请求前中间件
+     * @param callback 回调
+     * @param common 是否用在全局
+     * @returns 
+     */
+    before: (callback: request.middle["before"], common: boolean) => {
+      remove: () => void
+    }
+    /**
+     * 请求结果中间件
+     * @param callback 回调
+     * @param common 是否用在全局
+     * @returns 
+     */
+    result: (callback: request.middle["result"], common: boolean) => {
+      remove: () => void
+    }
+    /**
+     * 请求错误中间件
+     * @param callback 回调
+     * @param common 是否用在全局
+     * @returns 
+     */
+    error: (callback: request.middle["error"], common: boolean) => {
+      remove: () => void
+    }
+  },
+  request: request.functions['request']
+  throttleRequest: request.functions['throttleRequest']
 }
 
-/**
- * 图片及视频上传方法，包含从选择到上传两个过程
- * @param type 类型 支持图片或者视频
- * @param option 选项
- * @example
- * ```javascript
- * upload('image', { count: 1, sourceType: ['album', 'camera'] })
- * upload('video', { sourceType: ['album', 'camera'] })
- * ```
- */
-export function upload(type: keyof upload.Type, option: upload.Option): UploadTask
-
-/**
- * 直接上传已经选择的文件
- * @param files 类型 支持图片或者视频
- * @param option 选项
- * @example
- * ```javascript
- * uploadTempFile([{ path: '' }])
- * ```
- */
-export function uploadTempFile(files: upload.File[], option: upload.Option): UploadTask
+export function createUpload(config: {
+  config: RequestConfig,
+  middle: {
+    before: upload.middle['before'][]
+    result: upload.middle['result'][]
+    error: upload.middle['error'][]
+  }
+}): {
+  middle: {
+    /**
+     * 开始上传前中间件
+     * @param callback 回调
+     * @param common 是否用在全局
+     * @returns 
+     */
+    before: (callback: upload.middle['before'], common: boolean) => {
+      remove: () => void
+    }
+    /**
+     * 上传结果中间件
+     * @param callback 回调
+     * @param common 是否用在全局
+     * @returns 
+     */
+    result: (callback: upload.middle['result'], common: boolean) => {
+      remove: () => void
+    }
+    /**
+     * 上传错误中间件
+     * @param callback 回调
+     * @param common 是否用在全局
+     * @returns 
+     */
+    error: (callback: upload.middle['error'], common: boolean) => {
+      remove: () => void
+    }
+  },
+  upload: upload.functions['upload']
+  uploadTempFile: upload.functions['uploadTempFile']
+}
