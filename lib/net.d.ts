@@ -82,12 +82,16 @@ interface RequestConfig {
   }
 }
 
-declare namespace request {
+declare namespace Request {
   interface method {
     /** GET请求 */
     GET
     /** POST请求 */
     POST
+    /** PUT请求 */
+    PUT
+    /** DELETE请求 */
+    DELETE
   }
 
   interface RequestOption {
@@ -134,17 +138,19 @@ declare namespace request {
      */
     before: (callback: (requestParams: {
       url: string,
-      data: object | string,
+      contentType: string,
+      query: object,
+      body: object | null,
       header: object,
-      method: keyof request.method,
+      method: keyof Request.method,
       timeout: number
-    }, params: request.RequestOption) => object | Promise<object>) => void
+    }, params: Request.RequestOption) => object | Promise<object>) => void
 
-    result: (callback: (result: object, params: request.RequestOption) => object | Promise<object>) => void
+    result: (callback: (result: object, params: Request.RequestOption) => object | Promise<object>) => void
     error: (callback: (error: {
       code: number,
       message: string
-    } | object, params: request.RequestOption) => object | Promise<object>) => void
+    } | object, params: Request.RequestOption) => object | Promise<object>) => void
   }
 
 
@@ -203,10 +209,10 @@ declare namespace request {
  * @param data 要加在url上的get参数
  * @param params 请求参数
  */
-export function getUrl(url: string, data: object, params: request.RequestOption): string
+export function getUrl(url: string, data: object, params: Request.RequestOption): string
 
 
-declare namespace upload {
+declare namespace Upload {
 
   /** 上传参数 */
   interface Option {
@@ -303,14 +309,14 @@ declare namespace upload {
       url: string,
       data: object | string,
       header: object,
-      method: keyof request.method,
+      method: keyof Request.method,
       timeout: number
-    }, params: request.RequestOption) => object | Promise<object>): void
-    result(callback: (result: object[], params: request.RequestOption) => object[] | Promise<object[]>): void
+    }, params: Request.RequestOption) => object | Promise<object>): void
+    result(callback: (result: object[], params: Request.RequestOption) => object[] | Promise<object[]>): void
     error(callback: (error: {
       code: number,
       message: string
-    } | object, params: request.RequestOption) => object | Promise<object>): void
+    } | object, params: Request.RequestOption) => object | Promise<object>): void
   }
 
 
@@ -352,7 +358,7 @@ declare namespace upload {
        * upload('video', { sourceType: ['album', 'camera'] })
        * ```
        */
-    upload(type: keyof upload.Type, option: upload.Option): UploadTask
+    upload(type: keyof Upload.Type, option: Upload.Option): UploadTask
 
     /**
      * 直接上传已经选择的文件
@@ -363,16 +369,16 @@ declare namespace upload {
      * uploadTempFile([{ path: '' }])
      * ```
      */
-    uploadTempFile(files: upload.File[], option: upload.Option): UploadTask
+    uploadTempFile(files: Upload.File[], option: Upload.Option): UploadTask
   }
 }
 
 export function createRequest(config: {
   config: RequestConfig,
   middle: {
-    before: request.middle["before"][]
-    result: request.middle["result"][]
-    error: request.middle["error"][]
+    before: Request.middle["before"][]
+    result: Request.middle["result"][]
+    error: Request.middle["error"][]
   }
 }): {
   middle: {
@@ -380,40 +386,40 @@ export function createRequest(config: {
      * 请求前中间件
      * @param callback 回调
      * @param common 是否用在全局
-     * @returns 
+     * @returns
      */
-    before: (callback: request.middle["before"], common: boolean) => {
+    before: (callback: Request.middle["before"], common: boolean) => {
       remove: () => void
     }
     /**
      * 请求结果中间件
      * @param callback 回调
      * @param common 是否用在全局
-     * @returns 
+     * @returns
      */
-    result: (callback: request.middle["result"], common: boolean) => {
+    result: (callback: Request.middle["result"], common: boolean) => {
       remove: () => void
     }
     /**
      * 请求错误中间件
      * @param callback 回调
      * @param common 是否用在全局
-     * @returns 
+     * @returns
      */
-    error: (callback: request.middle["error"], common: boolean) => {
+    error: (callback: Request.middle["error"], common: boolean) => {
       remove: () => void
     }
   },
-  request: request.functions['request']
-  throttleRequest: request.functions['throttleRequest']
+  request: Request.functions['request']
+  throttleRequest: Request.functions['throttleRequest']
 }
 
 export function createUpload(config: {
   config: RequestConfig,
   middle: {
-    before: upload.middle['before'][]
-    result: upload.middle['result'][]
-    error: upload.middle['error'][]
+    before: Upload.middle['before'][]
+    result: Upload.middle['result'][]
+    error: Upload.middle['error'][]
   }
 }): {
   middle: {
@@ -421,30 +427,30 @@ export function createUpload(config: {
      * 开始上传前中间件
      * @param callback 回调
      * @param common 是否用在全局
-     * @returns 
+     * @returns
      */
-    before: (callback: upload.middle['before'], common: boolean) => {
+    before: (callback: Upload.middle['before'], common: boolean) => {
       remove: () => void
     }
     /**
      * 上传结果中间件
      * @param callback 回调
      * @param common 是否用在全局
-     * @returns 
+     * @returns
      */
-    result: (callback: upload.middle['result'], common: boolean) => {
+    result: (callback: Upload.middle['result'], common: boolean) => {
       remove: () => void
     }
     /**
      * 上传错误中间件
      * @param callback 回调
      * @param common 是否用在全局
-     * @returns 
+     * @returns
      */
-    error: (callback: upload.middle['error'], common: boolean) => {
+    error: (callback: Upload.middle['error'], common: boolean) => {
       remove: () => void
     }
   },
-  upload: upload.functions['upload']
-  uploadTempFile: upload.functions['uploadTempFile']
+  upload: Upload.functions['upload']
+  uploadTempFile: Upload.functions['uploadTempFile']
 }
