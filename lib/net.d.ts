@@ -385,28 +385,31 @@ export function createRequest(config: {
     /**
      * 请求前中间件
      * @param callback 回调
+     * @param sort 排序 数字小的先执行 默认为0
      * @param common 是否用在全局
      * @returns
      */
-    before: (callback: Request.middle["before"], common: boolean) => {
+    before: (callback: Request.middle["before"], sort: boolean, common: boolean) => {
       remove: () => void
     }
     /**
      * 请求结果中间件
      * @param callback 回调
+     * @param sort 排序 数字小的先执行 默认为0
      * @param common 是否用在全局
      * @returns
      */
-    result: (callback: Request.middle["result"], common: boolean) => {
+    result: (callback: Request.middle["result"], sort: boolean, common: boolean) => {
       remove: () => void
     }
     /**
      * 请求错误中间件
      * @param callback 回调
+     * @param sort 排序 数字小的先执行 默认为0
      * @param common 是否用在全局
      * @returns
      */
-    error: (callback: Request.middle["error"], common: boolean) => {
+    error: (callback: Request.middle["error"], sort: boolean, common: boolean) => {
       remove: () => void
     }
   },
@@ -426,28 +429,31 @@ export function createUpload(config: {
     /**
      * 开始上传前中间件
      * @param callback 回调
+     * @param sort 排序 数字小的先执行 默认为0
      * @param common 是否用在全局
      * @returns
      */
-    before: (callback: Upload.middle['before'], common: boolean) => {
+    before: (callback: Upload.middle['before'], sort: boolean, common: boolean) => {
       remove: () => void
     }
     /**
      * 上传结果中间件
      * @param callback 回调
+     * @param sort 排序 数字小的先执行 默认为0
      * @param common 是否用在全局
      * @returns
      */
-    result: (callback: Upload.middle['result'], common: boolean) => {
+    result: (callback: Upload.middle['result'], sort: boolean, common: boolean) => {
       remove: () => void
     }
     /**
      * 上传错误中间件
      * @param callback 回调
+     * @param sort 排序 数字小的先执行 默认为0
      * @param common 是否用在全局
      * @returns
      */
-    error: (callback: Upload.middle['error'], common: boolean) => {
+    error: (callback: Upload.middle['error'], sort: boolean, common: boolean) => {
       remove: () => void
     }
   },
